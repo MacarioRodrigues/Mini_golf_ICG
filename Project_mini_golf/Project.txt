@@ -1,0 +1,9 @@
+                    Plano do Projeto Mini golf
+
+-> Plano principal
+-> Fazer a bola
+-> Fazer a bandeira/buraco
+-> Fronteiras de cada circuito
+-> Definir as intereções da bola
+-> Sistema de intereção com o utilizador
+-> Decorar
