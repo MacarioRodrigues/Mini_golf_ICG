@@ -40,7 +40,7 @@
         const controls = new OrbitControls(camera, renderer.domElement);
 
 
-        const golfmodelurl = '/Project_mini_golf/assets/golf_ball/scene.gltf';
+        const golfmodelurl = '/Mini_golf_ICG/assets/golf_ball/scene.gltf';
 
         let golfballmodel;
         let ball;
@@ -49,27 +49,16 @@
         let mouseUpTime = 0;
 
         const loader_golf = new GLTFLoader();
-        // Carregue o modelo glTF
         loader_golf.load(golfmodelurl, function (gltf) {
-            // Crie uma variável para armazenar o modelo
             golfballmodel = gltf.scene;
             golfballmodel.scale.set(0.03, 0.03, 0.03);
             golfballmodel.position.set(2.8,-1,0);           // Não alterar
-            
-            // Crie uma cópia do modelo
             const golfballmodelClone = golfballmodel.clone();
-
-            // Crie uma esfera
             const ballGeometry = new THREE.SphereGeometry(1, 32, 32);
             const ballMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
             const ball = new THREE.Mesh(ballGeometry, ballMaterial);
             ball.position.set(-30, 1, -30);
-
-            // Adicione a cópia do modelo glTF à esfera
             ball.add(golfballmodelClone);
-            
-
-            // Adicione a esfera à cena
             scene.add(ball);
         }, undefined, function (error) {
             console.error(error);
@@ -80,20 +69,19 @@
         
         // Campo de golfe
         const groundGeometry = new THREE.PlaneGeometry(100, 100);
-        const groundTexture = new THREE.TextureLoader().load("/Project_mini_golf/assets/img/TCom_GrassCheckered_header.jpg");
+        const groundTexture = new THREE.TextureLoader().load("/Mini_golf_ICG/assets/img/TCom_GrassCheckered_header.jpg");
         const groundMaterial = new THREE.MeshBasicMaterial({ map: groundTexture, side: THREE.DoubleSide });
         const ground = new THREE.Mesh(groundGeometry, groundMaterial);
         ground.rotation.x = -Math.PI / 2;
         scene.add(ground);
 
-        // Crie a geometria do buraco (um cilindro)
         const holeGeometry = new THREE.CylinderGeometry(2, 2, 1, 32);
-        const holeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 }); // Preto
+        const holeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
         const hole = new THREE.Mesh(holeGeometry, holeMaterial);
-        hole.position.set(30, -0.4, 30); // Posição do buraco
+        hole.position.set(30, -0.4, 30); 
         scene.add(hole);
 
-        const flagmodelurl = '/Project_mini_golf/assets/golf_flag/scene.gltf';
+        const flagmodelurl = '/Mini_golf_ICG/assets/golf_flag/scene.gltf';
 
         let flagmodel;
         let flag;
@@ -105,48 +93,38 @@
             flagmodel = gltf.scene;
             flagmodel.scale.set(1, 1, 1);
             flagmodel.position.set(0,10,0);           // Não alterar
-            
-            // Crie uma cópia do modelo
             const flagmodelClone = flagmodel.clone();
-
-            // Crie a geometria da bandeira (um plano)
             const flagGeometry = new THREE.PlaneGeometry(1, 15);
-            const flagMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 }); // Vermelho
+            const flagMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 }); 
             const flag = new THREE.Mesh(flagGeometry, flagMaterial);
-            flag.position.set(33, 5, 33); // Posição da bandeira
+            flag.position.set(33, 5, 33); 
             scene.add(flag);
-
-            // Adicione a cópia do modelo glTF à esfera
             flag.add(flagmodelClone);
-            
-
-            // Adicione a esfera à cena
             scene.add(flag);
         }, undefined, function (error) {
             console.error(error);
         });
 
-        // Crie a geometria da parede
-        const wallGeometry = new THREE.BoxGeometry(100, 5, 5); // Largura, altura, profundidade
-        const wallTexture = new THREE.TextureLoader().load("/Project_mini_golf/assets/img/TCom_Wood_ThermallyModifiedAsh_header.jpg")
-        const wallMaterial = new THREE.MeshStandardMaterial({ map:wallTexture }); // Cinza
+        const wallGeometry = new THREE.BoxGeometry(100, 5, 5); 
+        const wallTexture = new THREE.TextureLoader().load("/Mini_golf_ICG/assets/img/TCom_Wood_ThermallyModifiedAsh_header.jpg")
+        const wallMaterial = new THREE.MeshStandardMaterial({ map:wallTexture }); 
         const wall = new THREE.Mesh(wallGeometry, wallMaterial);
-        wall.position.set(0, 2.5, 50); // Por exemplo, x = 0, y = 2.5 (metade da altura), z = 20
+        wall.position.set(0, 2.5, 50); 
         scene.add(wall);
 
         const wall_2 = new THREE.Mesh(wallGeometry, wallMaterial);
-        wall_2.position.set(0, 2.5, -50); // Por exemplo, x = 0, y = 2.5 (metade da altura), z = 20
+        wall_2.position.set(0, 2.5, -50); 
         scene.add(wall_2);
 
-        const wallGeometry_3 = new THREE.BoxGeometry(105, 5, 5); // Largura, altura, profundidade
+        const wallGeometry_3 = new THREE.BoxGeometry(105, 5, 5); 
         const wall_3 = new THREE.Mesh(wallGeometry_3,wallMaterial);
         wall_3.rotation.y = -Math.PI / 2;
-        wall_3.position.set(50, 2.5, 0); // Por exemplo, x = 0, y = 2.5 (metade da altura), z = 20
+        wall_3.position.set(50, 2.5, 0); 
         scene.add(wall_3);
 
         const wall_4 = new THREE.Mesh(wallGeometry_3, wallMaterial);
         wall_4.rotation.y = -Math.PI / 2;
-        wall_4.position.set(-50, 2.5, 0); // Por exemplo, x = 0, y = 2.5 (metade da altura), z = 20
+        wall_4.position.set(-50, 2.5, 0); 
         scene.add(wall_4);
 
         // // Crie uma linha indicativa
@@ -180,7 +158,7 @@
         camera.position.set(-50, 30, -52);
         camera.lookAt(-30, 1, -30);
 
-        const light_2 = new THREE.AmbientLight( 0x404040 ); // soft white light
+        const light_2 = new THREE.AmbientLight( 0x404040 ); 
         scene.add( light_2 );
 
         const directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
@@ -192,12 +170,12 @@
         directionalLight_2.position.set(55,30,40)
         scene.add(directionalLight_2);
         
-        const pointLight = new THREE.PointLight(0xffffff, 0.5); // Cor branca, intensidade 0.5
-        pointLight.position.set(-10, 10, 10); // Posição da luz (x, y, z)
+        const pointLight = new THREE.PointLight(0xffffff, 0.5); 
+        pointLight.position.set(-10, 10, 10); 
         scene.add(pointLight);
         
-        const pointLight_2 = new THREE.PointLight(0xffffff, 0.5); // Cor branca, intensidade 0.5
-        pointLight.position.set(-10, 5, -10); // Posição da luz (x, y, z)
+        const pointLight_2 = new THREE.PointLight(0xffffff, 0.5); 
+        pointLight.position.set(-10, 5, -10); 
         scene.add(pointLight);
 
         // Adicionar luz
@@ -215,8 +193,7 @@
         // Função para verificar se a bola entrou no buraco
         function checkHole(ball, hole) {
             const distance = ball.position.distanceTo(hole.position);
-            if (distance < 1) { // Se a bola estiver próxima o suficiente do buraco
-                // A bola entrou no buraco, faça algo aqui (por exemplo, alterar a cor do buraco)
+            if (distance < 1) { 
                 hole.material.color.set(0xFF0000); // Vermelho
             }
         }
