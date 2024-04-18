@@ -40,7 +40,7 @@
         const controls = new OrbitControls(camera, renderer.domElement);
 
 
-        const golfmodelurl = '/Mini_golf_ICG/assets/golf_ball/scene.gltf';
+        const golfmodelurl = '/assets/golf_ball/scene.gltf';
 
         let golfballmodel;
         let ball;
@@ -69,7 +69,7 @@
         
         // Campo de golfe
         const groundGeometry = new THREE.PlaneGeometry(100, 100);
-        const groundTexture = new THREE.TextureLoader().load("/Mini_golf_ICG/assets/img/TCom_GrassCheckered_header.jpg");
+        const groundTexture = new THREE.TextureLoader().load("/assets/img/TCom_GrassCheckered_header.jpg");
         const groundMaterial = new THREE.MeshBasicMaterial({ map: groundTexture, side: THREE.DoubleSide });
         const ground = new THREE.Mesh(groundGeometry, groundMaterial);
         ground.rotation.x = -Math.PI / 2;
@@ -81,7 +81,7 @@
         hole.position.set(30, -0.4, 30); 
         scene.add(hole);
 
-        const flagmodelurl = '/Mini_golf_ICG/assets/golf_flag/scene.gltf';
+        const flagmodelurl = '/assets/golf_flag/scene.gltf';
 
         let flagmodel;
         let flag;
@@ -106,7 +106,7 @@
         });
 
         const wallGeometry = new THREE.BoxGeometry(100, 5, 5); 
-        const wallTexture = new THREE.TextureLoader().load("/Mini_golf_ICG/assets/img/TCom_Wood_ThermallyModifiedAsh_header.jpg")
+        const wallTexture = new THREE.TextureLoader().load("/assets/img/TCom_Wood_ThermallyModifiedAsh_header.jpg")
         const wallMaterial = new THREE.MeshStandardMaterial({ map:wallTexture }); 
         const wall = new THREE.Mesh(wallGeometry, wallMaterial);
         wall.position.set(0, 2.5, 50); 
