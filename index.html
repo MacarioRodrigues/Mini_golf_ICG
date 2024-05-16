@@ -25,25 +25,35 @@
 	</script>
     <script type="module">
         import * as THREE from 'three';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        //import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import * as CANNON from '/cannon-es.js';
+
+        //Fisicas
+        const world = new CANNON.World({
+            gravity: new CANNON.Vec3(0, -9.82, 0)
+        });
+
+        const timeStep = 1 / 60;
+
+        
         // Inicialização da cena
-        //let ballVelocity = new THREE.Vector3();
+        let ball; // Removi a declaração duplicada aqui
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-
-        // Controles de órbita
-        const controls = new OrbitControls(camera, renderer.domElement);
-
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
+        const cameraPivot = new THREE.Object3D();
+        const cameraDistance = 50;
+        camera.position.set(0, 10, cameraDistance);
+        cameraPivot.add(camera);
+        scene.add(cameraPivot);
 
         const golfmodelurl = '/assets/golf_ball/scene.gltf';
 
         let golfballmodel;
-        let ball;
         let isMouseDown = false;
         let mouseDownTime = 0;
         let mouseUpTime = 0;
@@ -56,13 +66,19 @@
             const golfballmodelClone = golfballmodel.clone();
             const ballGeometry = new THREE.SphereGeometry(1, 32, 32);
             const ballMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
-            const ball = new THREE.Mesh(ballGeometry, ballMaterial);
-            ball.position.set(-30, 1, -30);
+            ball = new THREE.Mesh(ballGeometry, ballMaterial); // Atualizei aqui
+            ball.position.set(-30, 10, -30);
             ball.add(golfballmodelClone);
             scene.add(ball);
         }, undefined, function (error) {
             console.error(error);
         });
+
+        // Criar um corpo físico para a bola
+        const ballShape = new CANNON.Sphere(1); // Raio da bola é 1
+        const ballBody = new CANNON.Body({ mass: 1, position: new CANNON.Vec3(-30, 10, -30) });
+        ballBody.addShape(ballShape);
+        world.addBody(ballBody);
 
         const helper_axes = new THREE.AxesHelper(1000);
         scene.add(helper_axes);
@@ -74,6 +90,12 @@
         const ground = new THREE.Mesh(groundGeometry, groundMaterial);
         ground.rotation.x = -Math.PI / 2;
         scene.add(ground);
+
+        const groundShape = new CANNON.Plane();
+        const groundBody = new CANNON.Body({ mass: 0 });
+        groundBody.addShape(groundShape);
+        groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(-1, 0, 0), Math.PI / 2); 
+        world.addBody(groundBody);
 
         const holeGeometry = new THREE.CylinderGeometry(2, 2, 1, 32);
         const holeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
@@ -96,7 +118,7 @@
             const flagmodelClone = flagmodel.clone();
             const flagGeometry = new THREE.PlaneGeometry(1, 15);
             const flagMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 }); 
-            const flag = new THREE.Mesh(flagGeometry, flagMaterial);
+            flag = new THREE.Mesh(flagGeometry, flagMaterial); // Atualizei aqui
             flag.position.set(33, 5, 33); 
             scene.add(flag);
             flag.add(flagmodelClone);
@@ -105,6 +127,12 @@
             console.error(error);
         });
 
+        const flagShape = new CANNON.Box(new CANNON.Vec3(0.5, 7.5, 0.5)); 
+        const flagBody = new CANNON.Body({ mass: 0 });
+        flagBody.addShape(flagShape);
+        flagBody.position.set(33, 5, 33); 
+        world.addBody(flagBody);
+
         const wallGeometry = new THREE.BoxGeometry(100, 5, 5); 
         const wallTexture = new THREE.TextureLoader().load("/assets/img/TCom_Wood_ThermallyModifiedAsh_header.jpg")
         const wallMaterial = new THREE.MeshStandardMaterial({ map:wallTexture }); 
@@ -112,9 +140,21 @@
         wall.position.set(0, 2.5, 50); 
         scene.add(wall);
 
+        const wallShape = new CANNON.Box(new CANNON.Vec3(50, 2.5, 2.5));
+        const wallBody = new CANNON.Body({ mass: 0 }); 
+        wallBody.addShape(wallShape);
+        wallBody.position.set(0, 2.5, 50); 
+        world.addBody(wallBody); 
+
         const wall_2 = new THREE.Mesh(wallGeometry, wallMaterial);
         wall_2.position.set(0, 2.5, -50); 
         scene.add(wall_2);
+
+        const wall_2Shape = new CANNON.Box(new CANNON.Vec3(50, 2.5, 2.5));
+        const wall_2Body = new CANNON.Body({ mass: 0 }); 
+        wall_2Body.addShape(wall_2Shape);
+        wall_2Body.position.set(0, 2.5, -50); 
+        world.addBody(wall_2Body); 
 
         const wallGeometry_3 = new THREE.BoxGeometry(105, 5, 5); 
         const wall_3 = new THREE.Mesh(wallGeometry_3,wallMaterial);
@@ -122,37 +162,22 @@
         wall_3.position.set(50, 2.5, 0); 
         scene.add(wall_3);
 
+        const wall_3Shape = new CANNON.Box(new CANNON.Vec3(50, 2.5, 2.5));
+        const wall_3Body = new CANNON.Body({ mass: 0 }); 
+        wall_3Body.addShape(wall_3Shape);
+        wall_3Body.position.set(50, 2.5, 0); 
+        world.addBody(wall_3Body); 
+
         const wall_4 = new THREE.Mesh(wallGeometry_3, wallMaterial);
         wall_4.rotation.y = -Math.PI / 2;
         wall_4.position.set(-50, 2.5, 0); 
         scene.add(wall_4);
 
-        // // Crie uma linha indicativa
-        // const lineGeometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
-        // const lineMaterial = new THREE.LineBasicMaterial({ color: 0xff0000 });
-        // line = new THREE.Line(lineGeometry, lineMaterial);
-        // scene.add(line);
-
-        //document.addEventListener('mousedown', onMouseDown);
-        //document.addEventListener('mouseup', onMouseUp);
-        //document.addEventListener('mousemove', onMouseMove);
-
-            // Adicionar obstáculos
-            //const obstacles = [
-        //    { x: 0, z: 20, width: 5, depth: 5 },
-        //    { x: 15, z: 30, width: 8, depth: 3 },
-        //    { x: -10, z: 40, width: 4, depth: 6 }
-        //];
-
-        //obstacles.forEach(obstacle => {
-        //    const obstacleGeometry = new THREE.BoxGeometry(obstacle.width, 2, obstacle.depth);
-        //    const obstacleMaterial = new THREE.MeshBasicMaterial({ color: 0x8B4513 });
-        //    const obstacleMesh = new THREE.Mesh(obstacleGeometry, obstacleMaterial);
-        //    obstacleMesh.position.set(obstacle.x, 1, obstacle.z);
-        //    scene.add(obstacleMesh);
-        //});
-
-        
+        const wall_4Shape = new CANNON.Box(new CANNON.Vec3(50, 2.5, 2.5));
+        const wall_4Body = new CANNON.Body({ mass: 0 }); 
+        wall_4Body.addShape(wall_4Shape);
+        wall_4Body.position.set(-50, 2.5, 0); 
+        world.addBody(wall_4Body); 
 
         // Controle de câmera
         camera.position.set(-50, 30, -52);
@@ -174,10 +199,6 @@
         pointLight.position.set(-10, 10, 10); 
         scene.add(pointLight);
         
-        const pointLight_2 = new THREE.PointLight(0xffffff, 0.5); 
-        pointLight.position.set(-10, 5, -10); 
-        scene.add(pointLight);
-
         // Adicionar luz
         const light = new THREE.PointLight(0xffffff, 1, 100);
         light.position.set(0, 50, -50);
@@ -190,6 +211,38 @@
         scene.add( helper_2 );
         //renderer.setClearColor(0xFFFFFF);
 
+        // Adicionar eventos de mouse para controlar a força do lançamento da bola
+        document.addEventListener('mousedown', onMouseDown);
+        document.addEventListener('mouseup', onMouseUp);
+
+        function onMouseDown(event) {
+            isMouseDown = true;
+            mouseDownTime = Date.now();
+        }
+
+        function onMouseUp(event) {
+            if (isMouseDown) {
+                isMouseDown = false;
+                mouseUpTime = Date.now();
+                const timeDiff = (mouseUpTime - mouseDownTime) / 1000; // Diferença de tempo em segundos
+                force = Math.min(timeDiff * 10, 50); // Defina o limite máximo de força
+                launchBall(force);
+            }
+        }
+
+        function launchBall(force) {
+            const forceVector = new THREE.Vector3(0, 0, -force); // Vetor de força na direção do eixo z
+            const impulse = forceVector.clone().multiplyScalar(ballBody.mass); // Impulso necessário para alcançar a força desejada
+            ballBody.applyLocalImpulse(impulse, new CANNON.Vec3()); // Aplicar impulso à bola
+        }
+
+        // Atualizar a posição da bola com base na posição do corpo físico
+        function updateBallPosition() {
+            if (ball) { // Certifique-se de que ball está definido
+                ball.position.copy(ballBody.position);
+                ball.quaternion.copy(ballBody.quaternion);
+            }
+        }
         // Função para verificar se a bola entrou no buraco
         function checkHole(ball, hole) {
             const distance = ball.position.distanceTo(hole.position);
@@ -201,10 +254,23 @@
         // Controle de atualização da cena
         function animate() {
             requestAnimationFrame(animate);
+            world.step(timeStep);
+            updateBallPosition(); // Atualizar a posição da bola
             renderer.render(scene, camera);
         }
 
         animate();
+    </script>
+     <input type="range" min="1" max="100" value="50" class="slider" id="forceSlider">
+     <button onclick="launchBallWithSliderForce()">Enviar Bola</button>
+     <script>
+        // Função para lançar a bola com base na força do controle deslizante
+        function launchBallWithSliderForce() {
+            const slider = document.getElementById('forceSlider');
+            const force = slider.value; // Obter o valor atual do controle deslizante
+            launchForce = force; // Atualizar a força de lançamento
+            launchBall(); // Lançar a bola
+        }
     </script>
 </body>
 </html>
