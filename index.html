@@ -31,11 +31,10 @@
 
         //Fisicas
         const world = new CANNON.World({
-            gravity: new CANNON.Vec3(0, -9.82, 0)
+            gravity: new CANNON.Vec3(0, 0, 0)
         });
 
         const timeStep = 1 / 60;
-
         
         // Inicialização da cena
         let ball; // Removi a declaração duplicada aqui
@@ -45,19 +44,15 @@
         document.body.appendChild(renderer.domElement);
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
-        const cameraPivot = new THREE.Object3D();
-        const cameraDistance = 50;
-        camera.position.set(0, 10, cameraDistance);
-        cameraPivot.add(camera);
-        scene.add(cameraPivot);
+        camera.position.set(0, 20, -30);
 
-        const golfmodelurl = '/assets/golf_ball/scene.gltf';
+        /*const controls = new OrbitControls(camera, renderer.domElement);
+        controls.target.set(0, 0, 0);
+        controls.update();*/
 
         let golfballmodel;
-        let isMouseDown = false;
-        let mouseDownTime = 0;
-        let mouseUpTime = 0;
 
+        const golfmodelurl = '/assets/golf_ball/scene.gltf';
         const loader_golf = new GLTFLoader();
         loader_golf.load(golfmodelurl, function (gltf) {
             golfballmodel = gltf.scene;
@@ -67,7 +62,7 @@
             const ballGeometry = new THREE.SphereGeometry(1, 32, 32);
             const ballMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
             ball = new THREE.Mesh(ballGeometry, ballMaterial); // Atualizei aqui
-            ball.position.set(-30, 10, -30);
+            ball.position.set(-30, 1, -30);
             ball.add(golfballmodelClone);
             scene.add(ball);
         }, undefined, function (error) {
@@ -75,9 +70,11 @@
         });
 
         // Criar um corpo físico para a bola
-        const ballShape = new CANNON.Sphere(1); // Raio da bola é 1
-        const ballBody = new CANNON.Body({ mass: 1, position: new CANNON.Vec3(-30, 10, -30) });
+        const ballShape = new CANNON.Sphere(1); 
+        const ballBody = new CANNON.Body({ mass: 1, position: new CANNON.Vec3(-30, 1, -30) });
         ballBody.addShape(ballShape);
+        ballBody.linearDamping = 0.1; // Adicionando amortecimento linear para perda de velocidade constante
+        ballBody.angularDamping = 0.1; // Adicionando amortecimento angular
         world.addBody(ballBody);
 
         const helper_axes = new THREE.AxesHelper(1000);
@@ -103,85 +100,35 @@
         hole.position.set(30, -0.4, 30); 
         scene.add(hole);
 
-        const flagmodelurl = '/assets/golf_flag/scene.gltf';
-
         let flagmodel;
         let flag;
 
+        const flagmodelurl = '/assets/golf_flag/scene.gltf';
         const loader_flag = new GLTFLoader();
-        // Carregue o modelo glTF
         loader_flag.load(flagmodelurl, function (gltf) {
-            // Crie uma variável para armazenar o modelo
-            flagmodel = gltf.scene;
+            const flagmodel = gltf.scene;
             flagmodel.scale.set(1, 1, 1);
-            flagmodel.position.set(0,10,0);           // Não alterar
-            const flagmodelClone = flagmodel.clone();
-            const flagGeometry = new THREE.PlaneGeometry(1, 15);
-            const flagMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 }); 
-            flag = new THREE.Mesh(flagGeometry, flagMaterial); // Atualizei aqui
-            flag.position.set(33, 5, 33); 
-            scene.add(flag);
-            flag.add(flagmodelClone);
+            flagmodel.position.set(0, 10, 0);
+            const flag = new THREE.Object3D();
+            flag.add(flagmodel);
+            flag.position.set(30, 5, 30);
             scene.add(flag);
         }, undefined, function (error) {
             console.error(error);
         });
 
-        const flagShape = new CANNON.Box(new CANNON.Vec3(0.5, 7.5, 0.5)); 
-        const flagBody = new CANNON.Body({ mass: 0 });
-        flagBody.addShape(flagShape);
-        flagBody.position.set(33, 5, 33); 
-        world.addBody(flagBody);
-
         const wallGeometry = new THREE.BoxGeometry(100, 5, 5); 
-        const wallTexture = new THREE.TextureLoader().load("/assets/img/TCom_Wood_ThermallyModifiedAsh_header.jpg")
-        const wallMaterial = new THREE.MeshStandardMaterial({ map:wallTexture }); 
-        const wall = new THREE.Mesh(wallGeometry, wallMaterial);
-        wall.position.set(0, 2.5, 50); 
-        scene.add(wall);
+        const wallTexture = new THREE.TextureLoader().load("/assets/img/TCom_Wood_ThermallyModifiedAsh_header.jpg");
+        const wallMaterial = new THREE.MeshStandardMaterial({ map: wallTexture });
 
-        const wallShape = new CANNON.Box(new CANNON.Vec3(50, 2.5, 2.5));
-        const wallBody = new CANNON.Body({ mass: 0 }); 
-        wallBody.addShape(wallShape);
-        wallBody.position.set(0, 2.5, 50); 
-        world.addBody(wallBody); 
-
-        const wall_2 = new THREE.Mesh(wallGeometry, wallMaterial);
-        wall_2.position.set(0, 2.5, -50); 
-        scene.add(wall_2);
-
-        const wall_2Shape = new CANNON.Box(new CANNON.Vec3(50, 2.5, 2.5));
-        const wall_2Body = new CANNON.Body({ mass: 0 }); 
-        wall_2Body.addShape(wall_2Shape);
-        wall_2Body.position.set(0, 2.5, -50); 
-        world.addBody(wall_2Body); 
-
-        const wallGeometry_3 = new THREE.BoxGeometry(105, 5, 5); 
-        const wall_3 = new THREE.Mesh(wallGeometry_3,wallMaterial);
-        wall_3.rotation.y = -Math.PI / 2;
-        wall_3.position.set(50, 2.5, 0); 
-        scene.add(wall_3);
-
-        const wall_3Shape = new CANNON.Box(new CANNON.Vec3(50, 2.5, 2.5));
-        const wall_3Body = new CANNON.Body({ mass: 0 }); 
-        wall_3Body.addShape(wall_3Shape);
-        wall_3Body.position.set(50, 2.5, 0); 
-        world.addBody(wall_3Body); 
-
-        const wall_4 = new THREE.Mesh(wallGeometry_3, wallMaterial);
-        wall_4.rotation.y = -Math.PI / 2;
-        wall_4.position.set(-50, 2.5, 0); 
-        scene.add(wall_4);
-
-        const wall_4Shape = new CANNON.Box(new CANNON.Vec3(50, 2.5, 2.5));
-        const wall_4Body = new CANNON.Body({ mass: 0 }); 
-        wall_4Body.addShape(wall_4Shape);
-        wall_4Body.position.set(-50, 2.5, 0); 
-        world.addBody(wall_4Body); 
+        createWall(0, 2.5, 50);
+        createWall(0, 2.5, -50);
+        createWall(50, 2.5, 0, -Math.PI / 2);
+        createWall(-50, 2.5, 0, -Math.PI / 2);
 
         // Controle de câmera
-        camera.position.set(-50, 30, -52);
-        camera.lookAt(-30, 1, -30);
+        //camera.position.set(-50, 30, -52);
+        //camera.lookAt(-30, 1, -30);
 
         const light_2 = new THREE.AmbientLight( 0x404040 ); 
         scene.add( light_2 );
@@ -205,72 +152,111 @@
         scene.add(light);
 
         
+        // Eventos de mouse para controle da bola
+        let isMouseDown = false;
+        let initialMousePosition = new THREE.Vector2();
+        let currentMousePosition = new THREE.Vector2();
+        let forceVector = new THREE.Vector3();
+        const maxForce = 50;
+
         const helper = new THREE.DirectionalLightHelper( directionalLight, 5 );
         const helper_2 = new THREE.DirectionalLightHelper( directionalLight_2, 5 );
         scene.add(helper);
         scene.add( helper_2 );
         //renderer.setClearColor(0xFFFFFF);
 
-        // Adicionar eventos de mouse para controlar a força do lançamento da bola
-        document.addEventListener('mousedown', onMouseDown);
-        document.addEventListener('mouseup', onMouseUp);
+        const forceArrow = new THREE.ArrowHelper( new THREE.Vector3(),new THREE.Vector3(), 1, 0xff0000);
+        scene.add(forceArrow);
 
-        function onMouseDown(event) {
+        document.addEventListener('mousedown', (event) => {
             isMouseDown = true;
-            mouseDownTime = Date.now();
-        }
+            initialMousePosition.set(event.clientX, event.clientY);
+        });
 
-        function onMouseUp(event) {
+        document.addEventListener('mousemove', (event) => {
+            if (isMouseDown) {
+                currentMousePosition.set(event.clientX, event.clientY);
+                const deltaX = currentMousePosition.x - initialMousePosition.x;
+                const deltaY = currentMousePosition.y - initialMousePosition.y;
+                const forceMagnitude = Math.min(Math.sqrt(deltaX * deltaX + deltaY * deltaY), maxForce);
+                forceVector.set(deltaX, 0, deltaY).normalize().multiplyScalar(forceMagnitude);
+
+                forceArrow.setDirection(forceVector.clone().normalize());
+                forceArrow.setLength(forceVector.length());
+                forceArrow.position.copy(ball.position); // Atualiza a posição da seta para a posição da bola
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
             if (isMouseDown) {
                 isMouseDown = false;
-                mouseUpTime = Date.now();
-                const timeDiff = (mouseUpTime - mouseDownTime) / 1000; // Diferença de tempo em segundos
-                force = Math.min(timeDiff * 10, 50); // Defina o limite máximo de força
-                launchBall(force);
+                launchBall(forceVector);
+                forceVector.set(0, 0, 0);
+
+                forceArrow.setLength(0);
             }
-        }
+        });
 
+        function createWall(x, y, z, rotationY = 0) {
+            const wall = new THREE.Mesh(wallGeometry, wallMaterial);
+            wall.position.set(x, y, z);
+            wall.rotation.y = rotationY;
+            scene.add(wall);
+
+            const wallShape = new CANNON.Box(new CANNON.Vec3(50, 2.5, 2.5));
+            const wallBody = new CANNON.Body({ mass: 0 });
+            wallBody.addShape(wallShape);
+            wallBody.position.set(x, y, z);
+            wallBody.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), rotationY);
+            world.addBody(wallBody);
+        }
+        
         function launchBall(force) {
-            const forceVector = new THREE.Vector3(0, 0, -force); // Vetor de força na direção do eixo z
-            const impulse = forceVector.clone().multiplyScalar(ballBody.mass); // Impulso necessário para alcançar a força desejada
-            ballBody.applyLocalImpulse(impulse, new CANNON.Vec3()); // Aplicar impulso à bola
+            const impulse = new CANNON.Vec3(force.x, 0, -force.z);
+            ballBody.applyImpulse(impulse, ballBody.position);
         }
 
-        // Atualizar a posição da bola com base na posição do corpo físico
+        // Atualizar posição da bola
         function updateBallPosition() {
-            if (ball) { // Certifique-se de que ball está definido
+            if (ball) {
                 ball.position.copy(ballBody.position);
                 ball.quaternion.copy(ballBody.quaternion);
+
+                // Perda de velocidade constante
+                const damping = 0.005;
+                ballBody.velocity.scale(1 - damping, ballBody.velocity);
+
+                const wallDamping = 0.1; // Fator de redução da velocidade após o impacto com as paredes
+                ballBody.velocity.vmul(new CANNON.Vec3(wallDamping, 1, wallDamping));
+
+                const angularDamping = 0.01; // Fator de redução da velocidade de rotação
+                ballBody.angularVelocity.scale(1 - angularDamping, ballBody.angularVelocity);
             }
         }
+
         // Função para verificar se a bola entrou no buraco
-        function checkHole(ball, hole) {
+        function checkHole() {
             const distance = ball.position.distanceTo(hole.position);
             if (distance < 1) { 
                 hole.material.color.set(0xFF0000); // Vermelho
             }
         }
 
+        function updateCamera() {
+            camera.position.set(ball.position.x, ball.position.y + 20, ball.position.z - 30);
+            camera.lookAt(ball.position);
+        }
+
         // Controle de atualização da cena
         function animate() {
             requestAnimationFrame(animate);
-            world.step(timeStep);
-            updateBallPosition(); // Atualizar a posição da bola
+            updateCamera(); 
+            updateBallPosition();
+            world.step(timeStep); 
+            checkHole();
             renderer.render(scene, camera);
         }
-
         animate();
-    </script>
-     <input type="range" min="1" max="100" value="50" class="slider" id="forceSlider">
-     <button onclick="launchBallWithSliderForce()">Enviar Bola</button>
-     <script>
-        // Função para lançar a bola com base na força do controle deslizante
-        function launchBallWithSliderForce() {
-            const slider = document.getElementById('forceSlider');
-            const force = slider.value; // Obter o valor atual do controle deslizante
-            launchForce = force; // Atualizar a força de lançamento
-            launchBall(); // Lançar a bola
-        }
     </script>
 </body>
 </html>
