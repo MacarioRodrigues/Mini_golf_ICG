@@ -5,13 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mini Golf 3D</title>
     <style>
-       body { 
+        body { 
             margin: 0;
             overflow: hidden;
-       }
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: black; 
+        }
+        .info-card {
+            position: absolute;
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+            width: 300px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .info-card h2 {
+            margin-top: 0;
+        } 
+
     </style>
 </head>
 <body>
+
+    <div id="div-main" class="info-card">
+        <h2>Como Jogar</h2>
+        <p>Bem-vindo ao Mini Golf 3D!</p>
+        <p>Para jogar, clique e arraste a bola de golfe para definir a direção e a força do lançamento. Solte o mouse para lançar a bola. Tente colocar a bola no buraco!</p>
+        <p>Boa sorte!</p>
+        <button id="start" onclick="startGame()">Start Game</button>
+    </div>
 
     <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
 
@@ -33,10 +66,14 @@
         const world = new CANNON.World({
             gravity: new CANNON.Vec3(0, 0, 0)
         });
+        
+        document.getElementById('start').addEventListener('click', () => {
+            animate();
+            document.getElementById('div-main').style.display = 'none';
+        });
 
         const timeStep = 1 / 60;
         
-        // Inicialização da cena
         let ball; 
         const scene = new THREE.Scene();
         const renderer = new THREE.WebGLRenderer();
@@ -44,7 +81,7 @@
         document.body.appendChild(renderer.domElement);
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
-        camera.position.set(0, 20, -30);
+        camera.position.set(-50, 20, -50);
 
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
@@ -72,18 +109,16 @@
             console.error(error);
         });
 
-        // Criar um corpo físico para a bola
         const ballShape = new CANNON.Sphere(1); 
         const ballBody = new CANNON.Body({ mass: 1, position: new CANNON.Vec3(-30, 1, -30) });
         ballBody.addShape(ballShape);
-        ballBody.linearDamping = 0.1; // Adicionando amortecimento linear para perda de velocidade constante
-        ballBody.angularDamping = 0.1; // Adicionando amortecimento angular
+        ballBody.linearDamping = 0.1; 
+        ballBody.angularDamping = 0.1; 
         world.addBody(ballBody);
 
         const helper_axes = new THREE.AxesHelper(1000);
         scene.add(helper_axes);
         
-        // Campo de golfe
         const groundGeometry = new THREE.PlaneGeometry(100, 100);
         const groundTexture = new THREE.TextureLoader().load("/assets/img/TCom_GrassCheckered_header.jpg");
         const groundMaterial = new THREE.MeshBasicMaterial({ map: groundTexture, side: THREE.DoubleSide });
@@ -114,21 +149,22 @@
             flagmodel.position.set(0, 10, 0);
             const flag = new THREE.Object3D();
             flag.add(flagmodel);
-            flag.position.set(30, 5, 30);
+            flag.position.set(35, 5, 30);
             scene.add(flag);
         }, undefined, function (error) {
             console.error(error);
         });
 
-        const wallGeometry = new THREE.BoxGeometry(100, 5, 5); 
+        const wallGeometry = new THREE.BoxGeometry(100,5,5); 
         const wallTexture = new THREE.TextureLoader().load("/assets/img/TCom_Wood_ThermallyModifiedAsh_header.jpg");
         const wallMaterial = new THREE.MeshStandardMaterial({ map: wallTexture });
+        const wallMaterial_F = new CANNON.Material({ restitution: 0.7 });
 
         const wall1 = new THREE.Mesh(wallGeometry, wallMaterial);
         wall1.position.set(0, 2.5, 50);
         scene.add(wall1);
-        const wallShape1 = new CANNON.Box(new CANNON.Vec3(50, 2.5, 2.5));
-        const wallBody1 = new CANNON.Body({ mass: 0 });
+        const wallShape1 = new CANNON.Box(new CANNON.Vec3(50,2.5,2.5));
+        const wallBody1 = new CANNON.Body({ mass: 0, material: wallMaterial_F });
         wallBody1.addShape(wallShape1);
         wallBody1.position.set(0, 2.5, 50);
         world.addBody(wallBody1);
@@ -136,8 +172,8 @@
         const wall2 = new THREE.Mesh(wallGeometry, wallMaterial);
         wall2.position.set(0, 2.5, -50);
         scene.add(wall2);
-        const wallShape2 = new CANNON.Box(new CANNON.Vec3(50, 2.5, 2.5));
-        const wallBody2 = new CANNON.Body({ mass: 0 });
+        const wallShape2 = new CANNON.Box(new CANNON.Vec3(50,2.5,2.5));
+        const wallBody2 = new CANNON.Body({ mass: 0, material: wallMaterial_F });
         wallBody2.addShape(wallShape2);
         wallBody2.position.set(0, 2.5, -50);
         world.addBody(wallBody2);
@@ -146,8 +182,8 @@
         wall3.position.set(50, 2.5, 0);
         wall3.rotation.y = Math.PI / 2;
         scene.add(wall3);
-        const wallShape3 = new CANNON.Box(new CANNON.Vec3(50, 2.5, 2.5));
-        const wallBody3 = new CANNON.Body({ mass: 0 });
+        const wallShape3 = new CANNON.Box(new CANNON.Vec3(50,2.5,2.5));
+        const wallBody3 = new CANNON.Body({ mass: 0, material: wallMaterial_F});
         wallBody3.addShape(wallShape3);
         wallBody3.position.set(50, 2.5, 0);
         wallBody3.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), Math.PI / 2);
@@ -157,8 +193,8 @@
         wall4.position.set(-50, 2.5, 0);
         wall4.rotation.y = Math.PI / 2;
         scene.add(wall4);
-        const wallShape4 = new CANNON.Box(new CANNON.Vec3(50, 2.5, 2.5));
-        const wallBody4 = new CANNON.Body({ mass: 0 });
+        const wallShape4 = new CANNON.Box(new CANNON.Vec3(50,2.5,2.5));
+        const wallBody4 = new CANNON.Body({ mass: 0, material: wallMaterial_F});
         wallBody4.addShape(wallShape4);
         wallBody4.position.set(-50, 2.5, 0);
         wallBody4.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), Math.PI / 2);
@@ -174,6 +210,15 @@
         //camera.position.set(-50, 30, -52);
         //camera.lookAt(-30, 1, -30);
 
+        // Adicione um cubo grande como fundo
+        const skyGeometry = new THREE.BoxGeometry(1000, 1000, 1000);
+        const skyMaterial = new THREE.MeshBasicMaterial({
+            color: 0x87ceeb, // Cor do céu (azul claro)
+            side: THREE.BackSide // Garante que o material seja visível do lado de fora do cubo
+        });
+        const sky = new THREE.Mesh(skyGeometry, skyMaterial);
+        scene.add(sky);
+
         const light_2 = new THREE.AmbientLight( 0x404040 ); 
         scene.add( light_2 );
 
@@ -181,7 +226,6 @@
         directionalLight.position.set(-50,30,0);
         scene.add( directionalLight );  
 
-        // Crie uma luz direcional
         const directionalLight_2 = new THREE.DirectionalLight(0xffffff, 0.5);
         directionalLight_2.position.set(55,30,40)
         scene.add(directionalLight_2);
@@ -190,7 +234,6 @@
         pointLight.position.set(-10, 10, 10); 
         scene.add(pointLight);
         
-        // Adicionar luz
         const light = new THREE.PointLight(0xffffff, 1, 100);
         light.position.set(0, 50, -50);
         scene.add(light);
@@ -201,15 +244,19 @@
         scene.add( helper_2 );
         //renderer.setClearColor(0xFFFFFF);
 
+        //const forceArrow = new THREE.ArrowHelper(new THREE.Vector3(),new THREE.Vector3(),1, 0xff0000);
+        //scene.add(forceArrow); 
+        
+            
+        let animationId;
+        let fixedCameraBehindBall = false;
+        
         function handleMouseDragAndRelease() {
             let isDragging = false;
             let initialMousePosition = new THREE.Vector2();
             let forceVector = new THREE.Vector3();
-            const maxForce= 0.4;
+            const maxForce= 0.3;
 
-            const forceArrow = new THREE.ArrowHelper(new THREE.Vector3(),new THREE.Vector3(),1, 0xff0000);
-            scene.add(forceArrow);  
-            
             document.addEventListener('mousedown', (event) => {
                 if(!isBallStopped()) return;
                 const mouse = new THREE.Vector2();
@@ -223,22 +270,29 @@
                 if (intersects.length > 0) {
                     isDragging = true;
                     initialMousePosition.set(event.clientX, event.clientY);
+                    initialCameraPosition = camera.position.clone();
                 }
             });
 
             document.addEventListener('mousemove', (event) => {
                 if (isDragging) {
                     const currentMousePosition = new THREE.Vector2(event.clientX, event.clientY);
-                    const deltaY = currentMousePosition.y - initialMousePosition.y;
-                    const forceMagnitude = Math.min(Math.abs(deltaY), maxForce);
+                    const deltaX = (Math.abs(initialMousePosition.x) - Math.abs(currentMousePosition.x));
+                    const deltaY = -(Math.abs(initialMousePosition.y) - Math.abs(currentMousePosition.y));
 
-                    forceVector.set(0, 0, -forceMagnitude); // A força é proporcional à distância arrastada para trás, na direção z
+                    const forceMagnitude = Math.min(Math.sqrt(deltaX * deltaX + deltaY * deltaY) / 100, maxForce);
+                    forceVector.set(deltaX, 0, deltaY).normalize().multiplyScalar(forceMagnitude);
 
-                    forceArrow.position.copy(ball.position);
-                    forceArrow.setDirection(forceVector.clone().normalize());
-                    forceArrow.setLength(forceMagnitude);
-                    forceArrow.position.copy(ball.position); 
-                }   
+                    // forceArrow.position.copy(ball.position);
+                    // forceArrow.setDirection(forceVector.clone().normalize());
+                    // forceArrow.setLength(forceMagnitude * 1000);  
+
+                    if (!fixedCameraBehindBall) {
+                        const cameraOffset = new THREE.Vector3(0, 10, -20); 
+                        camera.position.copy(ball.position).add(cameraOffset);
+                        camera.lookAt(ball.position);
+                    }
+                }
             });
 
             document.addEventListener('mouseup', () => {
@@ -248,7 +302,9 @@
                     launchBall(force);
                     maxForce = 0;
                     forceVector.set(0, 0, 0);
-                    forceArrow.setLength(0);
+                    //forceArrow.setLength(0);
+                    camera.position.copy(initialCameraPosition);
+                    camera.lookAt(ball.position);
                 }
             });
         }
@@ -269,28 +325,27 @@
         
         
         let lastPositions = [];
-        const numPositionsToCheck = 10; // Quantas últimas posições queremos verificar
-        const positionTolerance = 0.01; // Tolerância para considerar a bola parada
-
+        const numPositionsToCheck = 10; 
+        const positionTolerance = 0.01; 
         function isBallStopped() {
             if (lastPositions.length < numPositionsToCheck) {
-                return false; // Se não tivermos posições suficientes, consideramos que a bola ainda está se movendo
+                return false; 
             }
-
             for (let i = 1; i < lastPositions.length; i++) {
                 const pos1 = lastPositions[i - 1];
                 const pos2 = lastPositions[i];
                 if (pos1.distanceTo(pos2) > positionTolerance) {
-                    return false; // Se qualquer par de posições estiver fora da tolerância, a bola ainda está se movendo
+                    return false; 
                 }
             }
-
-            return true; // Se todas as posições estiverem dentro da tolerância, a bola está parada
+            return true; 
         }
 
         function launchBall(force) {
             const forceGlobal = new THREE.Vector3(force.x, 0, force.z).applyQuaternion(ball.quaternion);
             const impulse = new CANNON.Vec3(forceGlobal.x, 0, forceGlobal.z);
+            console.log(impulse);
+            console.log(forceGlobal);
             ballBody.applyImpulse(impulse, ballBody.position);
         }
 
@@ -299,34 +354,40 @@
                 ball.position.copy(ballBody.position);
                 ball.quaternion.copy(ballBody.quaternion);
 
-                // Perda de velocidade constante
+                const maxSpeed = 100; 
+                if (ballBody.velocity.length() > maxSpeed) {
+                    ballBody.velocity.scale(maxSpeed / ballBody.velocity.length(), ballBody.velocity);
+                }
+
                 const damping = 0.05;
                 ballBody.velocity.scale(1 - damping, ballBody.velocity);
 
-                const wallDamping = 0.1; // Fator de redução da velocidade após o impacto com as paredes
+                const wallDamping = 0.1; 
                 ballBody.velocity.vmul(new CANNON.Vec3(wallDamping, 1, wallDamping));
 
-                const angularDamping = 0.05; // Fator de redução da velocidade de rotação
+                const angularDamping = 0.05; 
                 ballBody.angularVelocity.scale(1 - angularDamping, ballBody.angularVelocity);
 
                 lastPositions.push(ball.position.clone());
                 if (lastPositions.length > numPositionsToCheck) {
-                    lastPositions.shift(); // Manter apenas as últimas posições relevantes
-                }
-
-                if (!isBallStopped()){
-                    camera.position.copy(ball.position.clone().add(new THREE.Vector3(0, 10, -20)));
-                    camera.lookAt(ball.position);
+                    lastPositions.shift(); 
                 }
             }
         }
 
-        // Função para verificar se a bola entrou no buraco
         function checkHole() {
             const distance = ball.position.distanceTo(hole.position);
-            if (distance < 1) { 
-                hole.material.color.set(0xFF0000); // Vermelho
+            if (distance < 1.5) { 
+                ball.position.copy(hole.position); 
+                ball.position.y = -0.5; 
+                stopAnimation(); 
             }
+        }
+
+        function stopAnimation() {
+            cancelAnimationFrame(animationId);
+            ballBody.velocity.set(0, 0, 0);
+            ballBody.angularVelocity.set(0, 0, 0);
         }
 
         function updateCamera() {
@@ -334,17 +395,17 @@
             controls.update();
         }
 
-        // Controle de atualização da cena
         function animate() {
-            requestAnimationFrame(animate);
-            updateCamera(); 
+            animationId = requestAnimationFrame(animate);
+            updateCamera();
             updateBallPosition();
             handleMouseDragAndRelease();
             world.step(timeStep); 
             checkHole();
             renderer.render(scene, camera);
         }
-        animate();
+        
+
     </script>
 </body>
 </html>
