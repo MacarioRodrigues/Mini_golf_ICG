@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini Golf 3D</title>
+    <title>Mini Golf 3D - Level Selection</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Comic+Sans+MS&display=swap');
         
@@ -23,10 +23,17 @@
         h1 {
             font-size: 5em;
             margin: 0.5em 0;
-            color: #0072ff;
+            color: #0072ff; /* Matching the color used in the info-card */
         }
 
-        button {
+        .level-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 600px;
+        }
+
+        .level-button {
             padding: 12px 24px;
             font-size: 1.1em;
             color: #fff;
@@ -34,12 +41,14 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            margin-top: 1em;
+            margin: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             transition: background-color 0.3s, transform 0.3s;
+            flex: 1 0 30%; /* Adjusts the size of the buttons */
+            text-align: center;
         }
 
-        button:hover {
+        .level-button:hover {
             background-color: #005bb5;
             transform: scale(1.05);
         }
@@ -47,10 +56,15 @@
 </head>
 <body>
     <h1>Mini Golf 3D</h1>
-    <button onclick="startGame()">Start</button>
+    <div class="level-list">
+        <button class="level-button" onclick="startLevel(1)">Level 1</button>
+        <button class="level-button" onclick="startLevel(2)">Level 2</button>
+        <button class="level-button" onclick="startLevel(3)">Level 3</button>
+    </div>
+
     <script>
-        function startGame() {
-            window.location.href = "level_list.html";
+        function startLevel(level) {
+            window.location.href = "level" + level + ".html";
         }
     </script>
 </body>
