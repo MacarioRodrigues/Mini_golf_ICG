@@ -101,11 +101,11 @@
         camera.position.set(-50, 20, -50);
 
         const controls = new OrbitControls(camera, renderer.domElement);
-        // controls.enableDamping = true;
-        // controls.dampingFactor = 0.05;
-        // controls.maxPolarAngle = Math.PI / 2; 
-        // controls.minDistance = 10; 
-        // controls.maxDistance = 50; 
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.maxPolarAngle = Math.PI / 2; 
+        controls.minDistance = 10; 
+        controls.maxDistance = 50; 
 
         let golfballmodel;
 
@@ -191,7 +191,6 @@
         const wallMaterial = new THREE.MeshStandardMaterial({ map: wallTexture });
         const wallMaterial_F = new CANNON.Material({ restitution: 0.7 });
 
-        // Parte longa do L
         const wall1 = new THREE.Mesh(wallGeometry, wallMaterial);
         wall1.position.set(0, 2.5, -100);
         scene.add(wall1);
@@ -201,7 +200,6 @@
         wallBody1.position.set(0, 2.5, -100);
         world.addBody(wallBody1);
 
-        // Parte curta do L
         const wall2 = new THREE.Mesh(new THREE.BoxGeometry(100, 5, 5), wallMaterial);
         wall2.position.set(150, 2.5, 0);
         wall2.rotation.y = Math.PI / 2;
@@ -274,16 +272,42 @@
         world.addBody(sideWallBody5);
 
         // Luzes
+
+        const skyGeometry = new THREE.BoxGeometry(1000, 1000, 1000);
+        const skyMaterial = new THREE.MeshBasicMaterial({
+            color: 0x87ceeb, 
+            side: THREE.BackSide 
+        });
+        const sky = new THREE.Mesh(skyGeometry, skyMaterial);
+        scene.add(sky);
+
+        const light_2 = new THREE.AmbientLight( 0x404040 ); 
+        scene.add( light_2 );
+
+        const directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
+        directionalLight.position.set(-50,30,0);
+        scene.add( directionalLight );  
+
+        const directionalLight_2 = new THREE.DirectionalLight(0xffffff, 0.5);
+        directionalLight_2.position.set(55,30,40)
+        scene.add(directionalLight_2);
+        
+        const pointLight = new THREE.PointLight(0xffffff, 0.5); 
+        pointLight.position.set(-10, 10, 10); 
+        scene.add(pointLight);
+        
+        const light = new THREE.PointLight(0xffffff, 1, 100);
+        light.position.set(0, 50, -50);
+        scene.add(light);
+
+
         const ambientLight = new THREE.AmbientLight(0x404040);
         scene.add(ambientLight);
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-        directionalLight.position.set(50, 100, -50);
-        scene.add(directionalLight);
 
 
 
         let animationId;
-        //let fixedCameraBehindBall = false;
+        let fixedCameraBehindBall = false;
         
         function handleMouseDragAndRelease() {
             let isDragging = false;
@@ -306,7 +330,6 @@
                     initialMousePosition.set(event.clientX, event.clientY);
                     initialCameraPosition = camera.position.clone();
                 }
-                controls.enabled = false;
             });
 
             document.addEventListener('mousemove', (event) => {
@@ -338,26 +361,9 @@
                     launchBall(force);
                     forceVector.set(0, 0, 0);
                     initialMousePosition.set(0, 0);
-                    controls.enabled = true;
-                    //forceArrow.setLength(0);
                 }
             });
         }
-
-        // function createWall(x, y, z, rotationY = 0) {
-        //     const wall = new THREE.Mesh(wallGeometry, wallMaterial);
-        //     wall.position.set(x, y, z);
-        //     wall.rotation.y = rotationY;
-        //     scene.add(wall);
-
-        //     const wallShape = new CANNON.Box(new CANNON.Vec3(50, 2.5, 2.5));
-        //     const wallBody = new CANNON.Body({ mass: 0 });
-        //     wallBody.addShape(wallShape);
-        //     wallBody.position.set(x, y, z);
-        //     wallBody.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), rotationY);
-        //     world.addBody(wallBody);
-        // }
-        
         
         let lastPositions = [];
         const numPositionsToCheck = 10; 
@@ -418,26 +424,25 @@
         }
 
         function stopAnimation() {
-            cancelAnimationFrame(animationId);
             ballBody.velocity.set(0, 0, 0);
             ballBody.angularVelocity.set(0, 0, 0);
+            cancelAnimationFrame(animationId);
         }
 
-        // function updateCamera() {
-        //     controls.target.copy(ball.position);
-        //     controls.update();
-        // }
+        function updateCamera() {
+            controls.target.copy(ball.position);
+            controls.update();
+        }
 
         function animate() {
             animationId = requestAnimationFrame(animate);
-            //updateCamera();
+            updateCamera();
             updateBallPosition();
             handleMouseDragAndRelease();
             world.step(timeStep); 
             checkHole();
             renderer.render(scene, camera);
         }
-
     </script>
     <script type="module">
         if (performance.navigation.type == performance.navigation.TYPE_RELOAD) {
