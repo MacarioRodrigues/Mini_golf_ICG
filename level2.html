@@ -133,7 +133,6 @@
         ballBody.angularDamping = 0.1; 
         world.addBody(ballBody);
 
-        // Criando o campo em L
         const LGeometry = new THREE.PlaneGeometry(200, 100);
         const LTexture = new THREE.TextureLoader().load("/assets/img/TCom_GrassCheckered_header.jpg");
         const LMaterial = new THREE.MeshBasicMaterial({ map: LTexture, side: THREE.DoubleSide });
@@ -238,7 +237,7 @@
         bottomWallBody.position.set(-25, 2.5, 0);
         world.addBody(bottomWallBody);
 
-        // Paredes laterais da parte curta do L
+        
         const sideWall3 = new THREE.Mesh(new THREE.BoxGeometry(5, 5, 50), wallMaterial);
         sideWall3.position.set(125, 2.5, -50);
         sideWall3.rotation.y = Math.PI / 2;
@@ -270,8 +269,6 @@
         sideWallBody5.position.set(50, 2.5, 25);
         sideWallBody5.quaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), Math.PI / 2);
         world.addBody(sideWallBody5);
-
-        // Luzes
 
         const skyGeometry = new THREE.BoxGeometry(1000, 1000, 1000);
         const skyMaterial = new THREE.MeshBasicMaterial({

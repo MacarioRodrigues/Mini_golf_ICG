@@ -82,6 +82,7 @@
 
         function startGame() {
             animate();
+            gameInProgress = true;
             document.getElementById('div-main').style.display = 'none';
         }
 
@@ -249,14 +250,17 @@
         let direction = new THREE.Vector3();
         let isCharging = false;
         let chargeStartTime = 0;
+        let gameInProgress = false;
 
         function handleKeyDown(event) {
             switch (event.key) {
                 case 'a':
-                    controls.rotateLeft(0.05); 
+                    controls.azimuthAngle -= 0.05; 
+                    controls.update();
                     break;
                 case 'd':
-                    controls.rotateLeft(-0.05); 
+                    controls.azimuthAngle += 0.05; 
+                    controls.update();
                     break;
                 case ' ':
                     if (!isCharging) {
@@ -267,12 +271,13 @@
             }
         }
 
+
         function handleKeyUp(event) {
             if (event.key === ' ') {
                 if (isCharging) {
                     isCharging = false;
                     const chargeDuration = (Date.now() - chargeStartTime) / 1000;
-                    const forceMagnitude = Math.min(chargeDuration * 0.5, 10); // Scale as needed
+                    const forceMagnitude = Math.min(chargeDuration * 0.5, 10); 
                     const force = direction.clone().normalize().multiplyScalar(forceMagnitude);
                     launchBall(force);
                 }
@@ -312,6 +317,7 @@
             if (distance < 1.5) {
                 ball.position.copy(hole.position);
                 ball.position.y = -0.5;
+                showWinningMenu();
                 stopAnimation();
             }
         }
@@ -319,9 +325,18 @@
         function stopAnimation() {
             ballBody.velocity.set(0, 0, 0);
             ballBody.angularVelocity.set(0, 0, 0);
+            gameInProgress = false;
             cancelAnimationFrame(animationId);
         }
 
+        function showWinningMenu() {
+            document.getElementById('winning-menu').style.display = 'block';
+        }
+
+        function restartGame() {
+            document.getElementById('winning-menu').style.display = 'none';
+            startGame(); 
+        }
         function updateCamera() {
             controls.target.copy(ball.position);
             controls.update();

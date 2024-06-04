@@ -271,7 +271,7 @@
         //const forceArrow = new THREE.ArrowHelper(new THREE.Vector3(),new THREE.Vector3(),1, 0xff0000);
         //scene.add(forceArrow); 
         
-            
+        let gameInProgress = false;
         let animationId;
         let fixedCameraBehindBall = false;
         
@@ -385,8 +385,20 @@
             if (distance < 1.5) { 
                 ball.position.copy(hole.position); 
                 ball.position.y = -0.5; 
+                gameInProgress = false;
+                showWinningMenu();
                 stopAnimation(); 
             }
+        }
+
+        function showWinningMenu() {
+            document.getElementById('winning-menu').style.display = 'block';
+        }
+
+        function restartGame() {
+            // Reset the game state and any necessary variables
+            document.getElementById('winning-menu').style.display = 'none';
+            startGame(); // Optionally restart the game automatically
         }
 
         function stopAnimation() {
